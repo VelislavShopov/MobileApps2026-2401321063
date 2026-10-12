@@ -1,20 +1,21 @@
 package com.example.padelconnect.ui.create_match
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.padelconnect.data.local.AppDatabase
 import com.example.padelconnect.data.local.MatchEntity
-import kotlinx.coroutines.Dispatchers
+import com.example.padelconnect.data.repository.MatchRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CreateMatchViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val matchDao = AppDatabase.getDatabase(application).matchDao()
+@HiltViewModel
+class CreateMatchViewModel @Inject constructor(
+    private val matchRepository: MatchRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateMatchUiState())
     val uiState: StateFlow<CreateMatchUiState> = _uiState.asStateFlow()
@@ -22,42 +23,27 @@ class CreateMatchViewModel(application: Application) : AndroidViewModel(applicat
     private val _isMatchCreated = MutableStateFlow(false)
     val isMatchCreated: StateFlow<Boolean> = _isMatchCreated.asStateFlow()
 
-
     fun onLocationSelected(lat: Double, lng: Double) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                latitude = lat,
-                longitude = lng
-            )
-        }
+        _uiState.update { it.copy(latitude = lat, longitude = lng) }
     }
 
     fun onDateChanged(newDate: String) {
-        _uiState.update { currentState ->
-            currentState.copy(dateText = newDate)
-        }
+        _uiState.update { it.copy(dateText = newDate) }
     }
 
     fun onTimeChanged(hour: Int, minutes: Int) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                hour = hour,
-                minutes = minutes
-            )
-        }
+        _uiState.update { it.copy(hour = hour, minutes = minutes) }
     }
 
     fun onMaxPlayersChanged(count: Int) {
-        _uiState.update { currentState ->
-            currentState.copy(maxPlayers = count)
-        }
+        _uiState.update { it.copy(maxPlayers = count) }
     }
 
     fun createMatch() {
         val currentState = _uiState.value
         if (!currentState.hasValidLocation) return
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             val matchEntity = MatchEntity(
                 latitude = currentState.latitude!!,
                 longitude = currentState.longitude!!,
@@ -65,8 +51,7 @@ class CreateMatchViewModel(application: Application) : AndroidViewModel(applicat
                 timeText = currentState.timeText,
                 maxPlayers = currentState.maxPlayers
             )
-
-            matchDao.insertMatch(matchEntity)
+            matchRepository.insertMatch(matchEntity)
             _isMatchCreated.value = true
         }
     }

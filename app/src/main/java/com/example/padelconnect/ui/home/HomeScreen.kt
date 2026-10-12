@@ -2,20 +2,24 @@ package com.example.padelconnect.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.FormatListBulleted
 import androidx.compose.material.icons.rounded.SportsTennis
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,7 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HomeScreen(onCreateMatchClick: () -> Unit) {
+fun HomeScreen(
+    onCreateMatchClick: () -> Unit,
+    onViewMatchesClick: () -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -69,12 +76,13 @@ fun HomeScreen(onCreateMatchClick: () -> Unit) {
                     )
 
                     Text(
-                        text = "Set up a new match and invite players nearby.",
+                        text = "Set up a new match or check existing ones nearby.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
                     )
 
+                    // Action buttons side-by-side or stacked
                     Button(
                         onClick = onCreateMatchClick,
                         modifier = Modifier.fillMaxWidth(),
@@ -87,6 +95,24 @@ fun HomeScreen(onCreateMatchClick: () -> Unit) {
                         )
                         Text(
                             text = "Create Match",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedButton(
+                        onClick = onViewMatchesClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.FormatListBulleted,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text(
+                            text = "View Scheduled Matches",
                             style = MaterialTheme.typography.labelLarge
                         )
                     }

@@ -58,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.padelconnect.ui.components.DetailPickerRow
 import com.example.padelconnect.ui.components.SectionCard
@@ -78,7 +79,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun CreateMatchScreen(
     onNavigateBack: () -> Unit,
-    viewModel: CreateMatchViewModel = viewModel()
+    viewModel: CreateMatchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
