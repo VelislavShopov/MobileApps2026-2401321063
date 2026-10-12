@@ -1,19 +1,78 @@
 package com.example.padelconnect.ui.create_match
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Group
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDialog
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.padelconnect.ui.components.DetailPickerRow
+import com.example.padelconnect.ui.components.SectionCard
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.*
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,13 +82,19 @@ fun CreateMatchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var showTimeDialog by remember {mutableStateOf(false)}
-    var showDateDialog by remember {mutableStateOf(false)}
+    var showTimeDialog by remember { mutableStateOf(false) }
+    var showDateDialog by remember { mutableStateOf(false) }
 
     // Default camera centered on Plovdiv, Bulgaria
     val defaultLocation = LatLng(42.1354, 24.7453)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(defaultLocation, 12f)
+    }
+
+    var isMapLoaded by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(150.milliseconds)
+        isMapLoaded = true
     }
 
     val datePickerState = rememberDatePickerState()
@@ -40,16 +105,39 @@ fun CreateMatchScreen(
             val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
             }
-
             val formattedDate = formatter.format(Date(millis))
             viewModel.onDateChanged(formattedDate)
+        }
+    }
+
+    val isMatchCreated by viewModel.isMatchCreated.collectAsState()
+    LaunchedEffect(isMatchCreated) {
+        if (isMatchCreated) {
+            onNavigateBack()
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Padel Match") }
+                title = {
+                    Text(
+                        text = "Create Padel Match",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         }
     ) { paddingValues ->
@@ -57,168 +145,259 @@ fun CreateMatchScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Text(
-                text = "1. Select Location on Map",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
+            SectionCard(
+                stepNumber = "1",
+                title = "Select Location"
             ) {
-                GoogleMap(
-                    modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState,
-                    onMapClick = { latLng ->
-                        viewModel.onLocationSelected(latLng.latitude, latLng.longitude)
-                    }
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (uiState.hasValidLocation) {
-                        Marker(
-                            state = MarkerState(
-                                position = LatLng(
-                                    uiState.latitude!!,
-                                    uiState.longitude!!
-                                )
-                            ),
-                            title = "Match Location"
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(220.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isMapLoaded) {
+                            GoogleMap(
+                                modifier = Modifier.fillMaxSize(),
+                                cameraPositionState = cameraPositionState,
+                                onMapClick = { latLng ->
+                                    viewModel.onLocationSelected(latLng.latitude, latLng.longitude)
+                                }
+                            ) {
+                                if (uiState.hasValidLocation) {
+                                    val markerState = rememberMarkerState(
+                                        position = LatLng(uiState.latitude!!, uiState.longitude!!)
+                                    )
+                                    Marker(
+                                        state = markerState,
+                                        title = "Match Location"
+                                    )
+                                }
+                            }
+                        } else {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(36.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Location Status Badge
+                Surface(
+                    color = if (uiState.hasValidLocation) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = if (uiState.hasValidLocation) Icons.Rounded.CheckCircle else Icons.Rounded.LocationOn,
+                            contentDescription = null,
+                            tint = if (uiState.hasValidLocation) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (uiState.hasValidLocation) {
+                                "Location set: %.4f, %.4f".format(uiState.latitude, uiState.longitude)
+                            } else {
+                                "Tap anywhere on the map to pin a court"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = if (uiState.hasValidLocation) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
                 }
             }
 
-            Text(
-                text = if (uiState.hasValidLocation) {
-                    "Selected: %.4f, %.4f".format(uiState.latitude, uiState.longitude)
-                } else {
-                    "Tap on the map to place a court marker"
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = if (uiState.hasValidLocation) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-            )
-
-            HorizontalDivider()
-
-            Text(
-                text = "2. Match Details",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Text(
-                    text = if (uiState.dateText.isNotBlank()) "Selected date: ${uiState.dateText}"
-                           else "No date selected!",
-                    color = if (uiState.dateText.isNotBlank()) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.error
-                )
-
-                Button(onClick = {showDateDialog = true}){
-                    Text("Select Date")
-                }
-            }
-
-            if (showDateDialog){
-                DatePickerDialog(
-                    onDismissRequest = {showDateDialog = false},
-                    confirmButton = {
-                        Button(onClick = {showDateDialog = false}) {
-                            Text("Confirm")
-                        }
-                    }
-                ) {
-                    DatePicker(
-                        state = datePickerState,
-                        dateFormatter = dateFormatter
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Text(
-                    text = if (uiState.timeText.isNotBlank()) "Selected time: ${uiState.timeText}"
-                           else "No time selected!",
-                    color = if (uiState.timeText.isNotBlank()) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.error
-                )
-
-                Button(onClick = {showTimeDialog = true}){
-                    Text(text = "Select Time")
-                }
-            }
-
-            if (showTimeDialog){
-                val timePickerState = rememberTimePickerState(
-                    initialHour = 10,
-                    initialMinute = 0,
-                    is24Hour = true
-                )
-
-                TimePickerDialog(
-                    title = {},
-                    onDismissRequest = {showTimeDialog = false},
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                viewModel.onTimeChanged(timePickerState.hour, timePickerState.minute)
-                                showTimeDialog = false
-                            }
-                        ) {
-                            Text("Confirm")
-                        }
-                    }
-                ) {
-                    TimePicker(
-                        state = timePickerState
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            SectionCard(
+                stepNumber = "2",
+                title = "Match Details"
             ) {
-                Text(text = "Max Players: ${uiState.maxPlayers}")
-                Row {
-                    IconButton(
-                        onClick = { if (uiState.maxPlayers == 4) viewModel.onMaxPlayersChanged(2) }
+                DetailPickerRow(
+                    label = uiState.dateText.ifBlank { "Select Date" },
+                    icon = Icons.Rounded.CalendarToday,
+                    isSelected = uiState.dateText.isNotBlank(),
+                    onClick = { showDateDialog = true }
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                DetailPickerRow(
+                    label = uiState.timeText.ifBlank { "Select Time" },
+                    icon = Icons.Rounded.AccessTime,
+                    isSelected = uiState.timeText.isNotBlank(),
+                    onClick = { showTimeDialog = true }
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OutlinedCard(
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("-", style = MaterialTheme.typography.titleLarge)
-                    }
-                    IconButton(
-                        onClick = { if (uiState.maxPlayers == 2) viewModel.onMaxPlayersChanged(4) }
-                    ) {
-                        Text("+", style = MaterialTheme.typography.titleLarge)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Rounded.Group,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Max Players",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            IconButton(
+                                onClick = { viewModel.onMaxPlayersChanged(2) },
+                                enabled = uiState.maxPlayers == 4,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(
+                                        color = if (uiState.maxPlayers == 4) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Remove,
+                                    contentDescription = "Decrease players",
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+
+                            Text(
+                                text = "${uiState.maxPlayers}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+
+                            IconButton(
+                                onClick = { viewModel.onMaxPlayersChanged(4) },
+                                enabled = uiState.maxPlayers == 2,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(
+                                        color = if (uiState.maxPlayers == 2) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = "Increase players",
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = {
-                    viewModel.createMatch()
-                    onNavigateBack()
-                },
+                onClick = { viewModel.createMatch() },
                 enabled = uiState.hasValidLocation && uiState.dateText.isNotBlank() && uiState.timeText.isNotBlank(),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(52.dp)
             ) {
-                Text("Create Match")
+                Text(
+                    text = "Create Match",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
             }
+        }
+    }
+
+    if (showDateDialog) {
+        DatePickerDialog(
+            onDismissRequest = { showDateDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showDateDialog = false }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDateDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState,
+                dateFormatter = dateFormatter
+            )
+        }
+    }
+
+    if (showTimeDialog) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = 10,
+            initialMinute = 0,
+            is24Hour = true
+        )
+
+        TimePickerDialog(
+            title = {
+                Text(
+                    text = "Select Time",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            },
+            onDismissRequest = { showTimeDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.onTimeChanged(timePickerState.hour, timePickerState.minute)
+                        showTimeDialog = false
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimeDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            TimePicker(state = timePickerState)
         }
     }
 }

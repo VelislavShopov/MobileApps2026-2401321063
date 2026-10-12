@@ -28,7 +28,6 @@ fun AppNavigation(){
 
         composable(Routes.CREATE_MATCH) {
             CreateMatchScreen ({ navigationController.popBackStack() })
-            // NavController is managed ONLY here
 
         }
     }
