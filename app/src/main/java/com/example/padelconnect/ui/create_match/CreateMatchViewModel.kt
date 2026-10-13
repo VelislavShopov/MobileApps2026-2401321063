@@ -4,7 +4,6 @@ import android.content.Context
 import android.location.Geocoder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.padelconnect.data.local.MatchEntity
 import com.example.padelconnect.data.model.Match
 import com.example.padelconnect.data.model.Participant
 import com.example.padelconnect.data.preferences.UserPreferences
@@ -32,6 +31,7 @@ class CreateMatchViewModel @Inject constructor(
 
     private val _isMatchCreated = MutableStateFlow(false)
     val isMatchCreated: StateFlow<Boolean> = _isMatchCreated.asStateFlow()
+
     init {
         loadSavedCreatorName()
     }
@@ -106,15 +106,21 @@ class CreateMatchViewModel @Inject constructor(
                 creatorName = hostName,
                 latitude = currentState.latitude!!,
                 longitude = currentState.longitude!!,
+                streetAddress = currentState.streetAddress!!,
                 dateText = currentState.dateText,
                 timeText = currentState.timeText,
                 maxPlayers = currentState.maxPlayers,
                 participants = listOf(hostParticipant)
             )
 
-            matchRepository.insertMatch(newMatch)
+            try{
+                matchRepository.createMatch(newMatch)
 
-            _isMatchCreated.value = true
+                _isMatchCreated.value = true
+            }
+            catch (e : Exception){
+                e.printStackTrace()
+            }
         }
     }
 }

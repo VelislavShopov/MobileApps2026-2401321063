@@ -1,39 +1,64 @@
 package com.example.padelconnect.data.repository
 
-import com.example.padelconnect.data.local.MatchDao
-import com.example.padelconnect.data.local.toDomain
-import com.example.padelconnect.data.local.toEntity
 import com.example.padelconnect.data.model.Match
 import com.example.padelconnect.data.model.Participant
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MatchRepository @Inject constructor(
-    private val matchDao: MatchDao
+    private val firestore: FirebaseFirestore
 ) {
-    val allMatches: Flow<List<Match>> = matchDao.getAllMatches().map { entities ->
-        entities.map { it.toDomain() }
-    }
+    private val matchesCollection = firestore.collection("matches")
 
-    suspend fun insertMatch(match: Match) {
-        matchDao.insertMatch(match.toEntity())
-    }
+    // Real-time listener: emits updated match lists to all devices instantly
+    val allMatches: Flow<List<Match>> = callbackFlow {
+        val listener = matchesCollection.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
 
-    suspend fun joinMatch(matchId: Long, userId: String, userName: String): Boolean {
-        val entity = matchDao.getMatchById(matchId) ?: return false
-        val match = entity.toDomain()
-
-        if (match.isUserParticipant(userId) || match.isFull) {
-            return false
+            if (snapshot != null) {
+                val matches = snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(Match::class.java)?.copy(id = doc.id)
+                }
+                trySend(matches)
+            }
         }
+        awaitClose { listener.remove() }
+    }
 
-        val updatedParticipants = match.participants + Participant(id = userId, name = userName)
-        val updatedMatch = match.copy(participants = updatedParticipants)
+    // Creates a new match document on Firebase
+    suspend fun createMatch(match: Match) {
+        matchesCollection.document(match.id).set(match).await()
+    }
 
-        matchDao.insertMatch(updatedMatch.toEntity())
-        return true
+    // Joins a match transactionally to prevent race conditions
+    suspend fun joinMatch(matchId: String, userId: String, userName: String): Boolean {
+        return try {
+            val docRef = matchesCollection.document(matchId)
+
+            firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(docRef)
+                val match = snapshot.toObject(Match::class.java) ?: throw Exception("Match not found")
+
+                // Validation checks
+                if (match.isUserParticipant(userId) || match.isFull) {
+                    return@runTransaction false
+                }
+
+                val updatedParticipants = match.participants + Participant(id = userId, name = userName)
+                transaction.update(docRef, "participants", updatedParticipants)
+                true
+            }.await()
+        } catch (e: Exception) {
+            false
+        }
     }
 }

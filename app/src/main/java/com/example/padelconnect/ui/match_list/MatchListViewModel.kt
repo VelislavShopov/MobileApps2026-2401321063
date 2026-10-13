@@ -28,7 +28,7 @@ class MatchListViewModel @Inject constructor(
     val currentUserId: String = userPreferences.getUserId()
     private val currentUserName: String = userPreferences.getCreatorName() ?: "Player"
 
-    fun joinMatch(matchId: Long) {
+    fun joinMatch(matchId: String) {
         viewModelScope.launch {
             matchRepository.joinMatch(
                 matchId = matchId,

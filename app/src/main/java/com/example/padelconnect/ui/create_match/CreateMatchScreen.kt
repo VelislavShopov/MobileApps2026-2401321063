@@ -218,8 +218,8 @@ fun CreateMatchScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (uiState.hasValidLocation) {
-                                "Location set: %.4f, %.4f".format(uiState.latitude, uiState.longitude)
+                            text = if (uiState.hasValidLocation && uiState.streetAddress != null) {
+                                "Location set: ${uiState.streetAddress}"
                             } else {
                                 "Tap anywhere on the map to pin a court"
                             },

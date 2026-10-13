@@ -1,12 +1,11 @@
 package com.example.padelconnect.di
 
-import android.content.Context
-import com.example.padelconnect.data.local.AppDatabase
-import com.example.padelconnect.data.local.MatchDao
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -16,15 +15,5 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(
-        @ApplicationContext context: Context
-    ): AppDatabase {
-        return AppDatabase.getDatabase(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideMatchDao(database: AppDatabase): MatchDao {
-        return database.matchDao()
-    }
+    fun provideFirestore(): FirebaseFirestore = Firebase.firestore
 }

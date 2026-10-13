@@ -37,13 +37,15 @@ fun AppNavigation(){
             MatchListScreen(
                 onNavigateToCreateMatch = {
                     navigationController.navigate(Routes.CREATE_MATCH)
+                },
+                onNavigateBack = {
+                    navigationController.popBackStack()
                 }
             )
         }
 
         composable(Routes.CREATE_MATCH) {
             CreateMatchScreen ({ navigationController.popBackStack() })
-
         }
     }
 

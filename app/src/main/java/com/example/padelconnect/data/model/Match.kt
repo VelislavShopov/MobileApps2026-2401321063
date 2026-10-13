@@ -1,7 +1,11 @@
 package com.example.padelconnect.data.model
 
+import com.google.firebase.firestore.DocumentId
+import java.util.UUID
+
 data class Match(
-    val id: Long = 0L,
+    @DocumentId
+    val id: String = UUID.randomUUID().toString(),
     val creatorId: String = "",
     val creatorName: String = "",
     val latitude: Double = 0.0,

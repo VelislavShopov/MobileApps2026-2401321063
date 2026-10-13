@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "89983314764",
+    "project_id": "padelconnect-e1c5d",
+    "storage_bucket": "padelconnect-e1c5d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89983314764:android:79be430b57f9c2f2613de9",
+        "android_client_info": {
+          "package_name": "com.example.padelconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlilBQ_4ZDXFDsx8JKsTSuHIc6gmVx1FY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

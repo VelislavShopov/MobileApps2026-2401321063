@@ -4,22 +4,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.padelconnect.data.model.Match
 import com.example.padelconnect.ui.components.MatchCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchListScreen(
     onNavigateToCreateMatch: () -> Unit,
+    onNavigateBack: () -> Unit,
     viewModel: MatchListViewModel = hiltViewModel()
 ) {
     val matches by viewModel.matches.collectAsStateWithLifecycle()
@@ -28,7 +30,24 @@ fun MatchListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Padel Matches") }
+                title = {
+                    Text(
+                        text = "Open Padel Matches",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                )
             )
         },
         floatingActionButton = {
