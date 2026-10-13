@@ -8,10 +8,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -20,11 +22,18 @@ import com.example.padelconnect.ui.components.MatchCard
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchListScreen(
+    initialFilter: MatchFilter = MatchFilter.OPEN_ONLY,
     onNavigateToCreateMatch: () -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: MatchListViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(initialFilter) {
+        viewModel.setFilter(initialFilter)
+    }
+
     val matches by viewModel.matches.collectAsStateWithLifecycle()
+    val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val currentUserId = viewModel.currentUserId
 
     Scaffold(
@@ -32,7 +41,7 @@ fun MatchListScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Open Padel Matches",
+                        text = "Padel Matches",
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -56,28 +65,83 @@ fun MatchListScreen(
             }
         }
     ) { paddingValues ->
-        if (matches.isEmpty()) {
-            Box(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "No matches scheduled yet.\nTap + to create one!",
-                    style = MaterialTheme.typography.bodyLarge
+                FilterChip(
+                    selected = selectedFilter == MatchFilter.ALL,
+                    onClick = { viewModel.setFilter(MatchFilter.ALL) },
+                    label = { Text("All") }
+                )
+                FilterChip(
+                    selected = selectedFilter == MatchFilter.OPEN_ONLY,
+                    onClick = { viewModel.setFilter(MatchFilter.OPEN_ONLY) },
+                    label = { Text("Open Spots") }
+                )
+                FilterChip(
+                    selected = selectedFilter == MatchFilter.JOINED_MATCHES,
+                    onClick = { viewModel.setFilter(MatchFilter.JOINED_MATCHES) },
+                    label = { Text("Joined") }
+                )
+                FilterChip(
+                    selected = selectedFilter == MatchFilter.MY_MATCHES,
+                    onClick = { viewModel.setFilter(MatchFilter.MY_MATCHES) },
+                    label = { Text("My Matches") }
                 )
             }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(matches, key = { it.id }) { match ->
-                    MatchCard(match = match, currentUserId = currentUserId, onJoinClick = { viewModel.joinMatch(match.id)} )
+
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                matches.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No matches found for this filter.\nTry a different filter or create one!",
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(matches, key = { it.id }) { match ->
+                            MatchCard(
+                                match = match,
+                                currentUserId = currentUserId,
+                                onJoinClick = { viewModel.joinMatch(match.id) }
+                            )
+                        }
+                    }
                 }
             }
         }
