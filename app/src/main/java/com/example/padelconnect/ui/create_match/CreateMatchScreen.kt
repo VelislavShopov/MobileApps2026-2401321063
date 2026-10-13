@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -37,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -326,11 +328,31 @@ fun CreateMatchScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            SectionCard(
+                stepNumber = "3",
+                title = "Organizer Info"
+            ) {
+                OutlinedTextField(
+                    value = uiState.creatorName,
+                    onValueChange = { viewModel.onCreatorNameChanged(it) },
+                    label = { Text("Your Name / Host Name") },
+                    placeholder = { Text("e.g. Alex") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Person,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             Button(
                 onClick = { viewModel.createMatch() },
-                enabled = uiState.hasValidLocation && uiState.dateText.isNotBlank() && uiState.timeText.isNotBlank(),
+                enabled = uiState.hasValidLocation && uiState.dateText.isNotBlank() && uiState.timeText.isNotBlank() && uiState.creatorName.isNotBlank(),
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .fillMaxWidth()

@@ -13,4 +13,7 @@ interface MatchDao {
 
     @Query("SELECT * FROM matches ORDER BY id DESC")
     fun getAllMatches(): Flow<List<MatchEntity>>
+
+    @Query("SELECT * FROM matches WHERE id = :matchId")
+    suspend fun getMatchById(matchId: Long): MatchEntity?
 }

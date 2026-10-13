@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.padelconnect.data.local.MatchEntity
+import com.example.padelconnect.data.model.Match
 import com.example.padelconnect.ui.components.MatchCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,6 +23,7 @@ fun MatchListScreen(
     viewModel: MatchListViewModel = hiltViewModel()
 ) {
     val matches by viewModel.matches.collectAsStateWithLifecycle()
+    val currentUserId = viewModel.currentUserId
 
     Scaffold(
         topBar = {
@@ -57,7 +58,7 @@ fun MatchListScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(matches, key = { it.id }) { match ->
-                    MatchCard(match = match)
+                    MatchCard(match = match, currentUserId = currentUserId, onJoinClick = { viewModel.joinMatch(match.id)} )
                 }
             }
         }
