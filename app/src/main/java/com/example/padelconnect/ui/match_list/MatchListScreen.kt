@@ -6,10 +6,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +39,14 @@ fun MatchListScreen(
     val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val currentUserId = viewModel.currentUserId
+
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { message ->
+            errorMessage = message
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -138,11 +150,44 @@ fun MatchListScreen(
                             MatchCard(
                                 match = match,
                                 currentUserId = currentUserId,
-                                onJoinClick = { viewModel.joinMatch(match.id) }
+                                onJoinClick = { viewModel.joinMatch(match) },
+                                onDeleteClick = {viewModel.deleteMatch(match.id)}
                             )
                         }
                     }
                 }
+            }
+
+            errorMessage?.let { message ->
+                AlertDialog(
+                    onDismissRequest = { errorMessage = null },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Rounded.ErrorOutline,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    },
+                    title = {
+                        Text(
+                            text = "Cannot Join Match",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { errorMessage = null }) {
+                            Text("OK")
+                        }
+                    }
+                )
             }
         }
     }

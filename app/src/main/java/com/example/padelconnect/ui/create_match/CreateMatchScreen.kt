@@ -61,7 +61,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.padelconnect.ui.components.DetailPickerRow
 import com.example.padelconnect.ui.components.SectionCard
 import com.google.android.gms.maps.model.CameraPosition
@@ -85,7 +84,8 @@ fun CreateMatchScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var showTimeDialog by remember { mutableStateOf(false) }
+    var showStartTimeDialog by remember { mutableStateOf(false) }
+    var showEndTimeDialog by remember {mutableStateOf(false)}
     var showDateDialog by remember { mutableStateOf(false) }
 
     // Default camera centered on Plovdiv, Bulgaria
@@ -119,6 +119,9 @@ fun CreateMatchScreen(
             onNavigateBack()
         }
     }
+
+    val isTimeValid by  viewModel.isTimeValid.collectAsState()
+    val timeError = !isTimeValid && uiState.startTimeText.isNotBlank() && uiState.endTimeText.isNotBlank()
 
     Scaffold(
         topBar = {
@@ -245,11 +248,32 @@ fun CreateMatchScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 DetailPickerRow(
-                    label = uiState.timeText.ifBlank { "Select Time" },
+                    label = uiState.startTimeText.ifBlank { "Select Start Time" },
                     icon = Icons.Rounded.AccessTime,
-                    isSelected = uiState.timeText.isNotBlank(),
-                    onClick = { showTimeDialog = true }
+                    isSelected = uiState.startTimeText.isNotBlank(),
+                    isError = timeError,
+                    onClick = { showStartTimeDialog = true }
                 )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                DetailPickerRow(
+                    label = uiState.endTimeText.ifBlank { "Select End Time" },
+                    icon = Icons.Rounded.AccessTime,
+                    isSelected = uiState.endTimeText.isNotBlank(),
+                    isError = timeError,
+                    onClick = { showEndTimeDialog = true }
+                )
+
+                if (timeError) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "End time must be at least 30 minutes after start time",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -352,7 +376,7 @@ fun CreateMatchScreen(
 
             Button(
                 onClick = { viewModel.createMatch() },
-                enabled = uiState.hasValidLocation && uiState.dateText.isNotBlank() && uiState.timeText.isNotBlank() && uiState.creatorName.isNotBlank(),
+                enabled = uiState.hasValidLocation && uiState.dateText.isNotBlank() && uiState.startTimeText.isNotBlank() && uiState.creatorName.isNotBlank() && !timeError && uiState.startTimeText.isNotBlank() && uiState.endTimeText.isNotBlank(),
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -388,7 +412,7 @@ fun CreateMatchScreen(
         }
     }
 
-    if (showTimeDialog) {
+    if (showStartTimeDialog) {
         val timePickerState = rememberTimePickerState(
             initialHour = 10,
             initialMinute = 0,
@@ -403,24 +427,60 @@ fun CreateMatchScreen(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
             },
-            onDismissRequest = { showTimeDialog = false },
+            onDismissRequest = { showStartTimeDialog = false },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.onTimeChanged(timePickerState.hour, timePickerState.minute)
-                        showTimeDialog = false
+                        viewModel.onStartTimeChanged(timePickerState.hour, timePickerState.minute)
+                        showStartTimeDialog = false
                     }
                 ) {
                     Text("Confirm")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showTimeDialog = false }) {
+                TextButton(onClick = { showStartTimeDialog = false }) {
                     Text("Cancel")
                 }
             }
         ) {
             TimePicker(state = timePickerState)
+        }
+    }
+
+    if (showEndTimeDialog) {
+        val endTimePickerState = rememberTimePickerState(
+            initialHour = 11,
+            initialMinute = 0,
+            is24Hour = true
+        )
+
+        TimePickerDialog(
+            title = {
+                Text(
+                    text = "Select End Time",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            },
+            onDismissRequest = { showEndTimeDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.onEndTimeChanged(endTimePickerState.hour, endTimePickerState.minute)
+                        showEndTimeDialog = false
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndTimeDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            TimePicker(state = endTimePickerState)
         }
     }
 }

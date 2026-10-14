@@ -10,12 +10,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
-    private val userPreferences: UserPreferences
+    userPreferences: UserPreferences
 ) : ViewModel() {
     val currentUserId: String = userPreferences.getUserId()
 
@@ -30,4 +31,10 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun deleteMatch(matchId: String) {
+        viewModelScope.launch {
+            matchRepository.deleteMatch(matchId)
+        }
+    }
 }

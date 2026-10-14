@@ -9,7 +9,7 @@ import androidx.core.content.edit
 
 @Singleton
 class UserPreferences @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) {
     private val prefs = context.getSharedPreferences("padel_connect_prefs", Context.MODE_PRIVATE)
 

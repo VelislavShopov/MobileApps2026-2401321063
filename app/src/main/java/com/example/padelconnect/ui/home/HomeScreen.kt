@@ -50,7 +50,8 @@ fun HomeScreen(
             MyMatchesSection(
                 matches = myMatches,
                 currentUserId = currentUserId,
-                onViewAllClick = onViewMyMatchesClick
+                onViewAllClick = onViewMyMatchesClick,
+                viewModel = viewModel
             )
 
             Column(
@@ -72,7 +73,6 @@ fun HomeScreen(
                     onClick = onCreateMatchClick
                 )
 
-                // Secondary Action: View Matches
                 ActionCard(
                     title = "View Matches",
                     subtitle = "Browse & join open padel games",
@@ -91,7 +91,8 @@ fun HomeScreen(
 private fun MyMatchesSection(
     matches: List<Match>,
     currentUserId: String,
-    onViewAllClick: () -> Unit
+    onViewAllClick: () -> Unit,
+    viewModel: HomeViewModel
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -116,7 +117,7 @@ private fun MyMatchesSection(
         if (matches.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                 )
@@ -144,11 +145,12 @@ private fun MyMatchesSection(
                 contentPadding = PaddingValues(end = 12.dp)
             ) {
                 items(matches, key = { it.id }) { match ->
-                    Box(modifier = Modifier.width(300.dp)) {
+                    Box(modifier = Modifier.width(350.dp)) {
                         MatchCard(
                             match = match,
                             currentUserId = currentUserId,
-                            onJoinClick = {}
+                            onJoinClick = {},
+                            onDeleteClick = {viewModel.deleteMatch(match.id)}
                         )
                     }
                 }

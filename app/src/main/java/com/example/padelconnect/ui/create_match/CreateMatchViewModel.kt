@@ -22,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateMatchViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
@@ -31,6 +31,8 @@ class CreateMatchViewModel @Inject constructor(
 
     private val _isMatchCreated = MutableStateFlow(false)
     val isMatchCreated: StateFlow<Boolean> = _isMatchCreated.asStateFlow()
+    private val _isTimeValid = MutableStateFlow(false)
+    val isTimeValid: StateFlow<Boolean> = _isTimeValid.asStateFlow()
 
     init {
         loadSavedCreatorName()
@@ -79,8 +81,26 @@ class CreateMatchViewModel @Inject constructor(
         _uiState.update { it.copy(dateText = newDate) }
     }
 
-    fun onTimeChanged(hour: Int, minutes: Int) {
-        _uiState.update { it.copy(hour = hour, minutes = minutes) }
+    fun onStartTimeChanged(hour: Int, minutes: Int) {
+        _uiState.update { it.copy(startHour = hour, startMinutes = minutes) }
+        _isTimeValid.value = isTimeValid()
+    }
+
+    fun onEndTimeChanged(hour: Int, minutes: Int){
+        _uiState.update { it.copy(endHour = hour, endMinutes = minutes) }
+        _isTimeValid.value = isTimeValid()
+    }
+
+    private fun isTimeValid(): Boolean {
+        val state = _uiState.value
+
+        if (state.startHour == null || state.startMinutes == null || state.endHour == null || state.endMinutes == null){
+            return false
+        }
+
+        val startTotalMinutes = state.startHour * 60 + state.startMinutes
+        val endTotalMinutes = state.endHour * 60 + state.endMinutes - 30
+        return endTotalMinutes > startTotalMinutes
     }
 
     fun onMaxPlayersChanged(count: Int) {
@@ -91,6 +111,10 @@ class CreateMatchViewModel @Inject constructor(
         viewModelScope.launch {
             val currentState = _uiState.value
             val hostName = currentState.creatorName.trim()
+
+            if (!isTimeValid()){
+                return@launch
+            }
 
             userPreferences.saveCreatorName(hostName)
 
@@ -108,7 +132,8 @@ class CreateMatchViewModel @Inject constructor(
                 longitude = currentState.longitude!!,
                 streetAddress = currentState.streetAddress!!,
                 dateText = currentState.dateText,
-                timeText = currentState.timeText,
+                startTimeText = currentState.startTimeText,
+                endTimeText = currentState.endTimeText,
                 maxPlayers = currentState.maxPlayers,
                 participants = listOf(hostParticipant)
             )

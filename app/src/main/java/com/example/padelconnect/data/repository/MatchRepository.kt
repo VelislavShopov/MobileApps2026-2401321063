@@ -58,6 +58,17 @@ class MatchRepository @Inject constructor(
                 true
             }.await()
         } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun deleteMatch(matchId: String): Boolean {
+        return try {
+            matchesCollection.document(matchId).delete().await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
     }

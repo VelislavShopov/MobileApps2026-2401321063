@@ -1,5 +1,6 @@
 package com.example.padelconnect.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,16 +23,35 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-public fun DetailPickerRow(
+fun DetailPickerRow(
     label: String,
     icon: ImageVector,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isError: Boolean = false
 ) {
+    val borderColor = when {
+        isError -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.outline
+    }
+
+    val iconTint = when {
+        isError -> MaterialTheme.colorScheme.error
+        isSelected -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.outline
+    }
+
+    val textColor = when {
+        isError -> MaterialTheme.colorScheme.error
+        isSelected -> MaterialTheme.colorScheme.onSurface
+        else -> MaterialTheme.colorScheme.outline
+    }
+
     OutlinedCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        border = BorderStroke(width = if (isError) 1.5.dp else 1.dp, color = borderColor)
     ) {
         Row(
             modifier = Modifier
@@ -43,21 +64,29 @@ public fun DetailPickerRow(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                    tint = iconTint,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
+                    fontWeight = if (isSelected || isError) FontWeight.SemiBold else FontWeight.Normal,
+                    color = textColor
                 )
             }
 
             FilledTonalButton(
                 onClick = onClick,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
+                colors = if (isError) {
+                    ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                } else {
+                    ButtonDefaults.filledTonalButtonColors()
+                }
             ) {
                 Text(
                     text = if (isSelected) "Change" else "Select",
