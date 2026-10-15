@@ -1,4 +1,4 @@
-package com.example.padelconnect.ui.create_match
+package com.example.padelconnect.ui.edit_match
 
 import android.content.Context
 import android.location.Geocoder
@@ -6,13 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.padelconnect.data.model.Match
-import com.example.padelconnect.data.model.Participant
 import com.example.padelconnect.data.preferences.UserPreferences
 import com.example.padelconnect.data.repository.MatchRepository
 import com.example.padelconnect.ui.match_state.MatchFormUiState
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

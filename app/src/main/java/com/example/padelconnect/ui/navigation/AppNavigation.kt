@@ -6,7 +6,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.padelconnect.data.model.Match
 import com.example.padelconnect.ui.create_match.CreateMatchScreen
 import com.example.padelconnect.ui.edit_match.EditMatchScreen
 import com.example.padelconnect.ui.home.HomeScreen
