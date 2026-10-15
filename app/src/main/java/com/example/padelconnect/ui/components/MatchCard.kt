@@ -16,6 +16,7 @@ import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Person
@@ -40,6 +41,7 @@ fun MatchCard(
     match: Match,
     currentUserId: String,
     onJoinClick: () -> Unit,
+    onEditClick: (Match) -> Unit = {},
     onDeleteClick: () -> Unit = {}
 ) {
     val isHost = match.isUserHost(currentUserId)
@@ -192,7 +194,7 @@ fun MatchCard(
             Spacer(modifier = Modifier.height(2.dp))
 
             when {
-                // ONLY THE HOST sees the Delete Button
+                // HOST SEES EDIT & DELETE BUTTONS
                 isHost -> {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -200,12 +202,17 @@ fun MatchCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedButton(
-                            onClick = { },
-                            enabled = false,
+                            onClick = {onEditClick(match)},
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Your Match (Host)")
+                            Icon(
+                                imageVector = Icons.Rounded.Edit,
+                                contentDescription = "Edit Match",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Edit Match")
                         }
 
                         Button(

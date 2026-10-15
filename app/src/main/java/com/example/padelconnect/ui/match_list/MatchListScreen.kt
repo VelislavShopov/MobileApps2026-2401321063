@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.padelconnect.data.model.Match
 import com.example.padelconnect.ui.components.MatchCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,6 +29,7 @@ import com.example.padelconnect.ui.components.MatchCard
 fun MatchListScreen(
     initialFilter: MatchFilter = MatchFilter.OPEN_ONLY,
     onNavigateToCreateMatch: () -> Unit,
+    onNavigateToEditMatchClick: (Match) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: MatchListViewModel = hiltViewModel()
 ) {
@@ -150,6 +152,7 @@ fun MatchListScreen(
                             MatchCard(
                                 match = match,
                                 currentUserId = currentUserId,
+                                onEditClick = onNavigateToEditMatchClick,
                                 onJoinClick = { viewModel.joinMatch(match) },
                                 onDeleteClick = {viewModel.deleteMatch(match.id)}
                             )

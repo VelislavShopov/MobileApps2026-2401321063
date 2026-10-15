@@ -1,6 +1,6 @@
-package com.example.padelconnect.ui.create_match
+package com.example.padelconnect.ui.match_state
 
-data class CreateMatchUiState(
+data class MatchFormUiState(
     val creatorName: String = "",
     val isNameSaved: Boolean = false,
     val latitude: Double? = null,
@@ -19,5 +19,4 @@ data class CreateMatchUiState(
         get() = if (startHour != null && startMinutes != null) "%02d:%02d".format(startHour, startMinutes) else ""
     val endTimeText: String
         get() = if (endHour != null && endMinutes != null) "%02d:%02d".format(endHour, endMinutes) else ""
-
 }

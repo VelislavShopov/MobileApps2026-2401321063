@@ -27,6 +27,7 @@ import com.example.padelconnect.ui.components.MatchCard
 fun HomeScreen(
     onCreateMatchClick: () -> Unit,
     onViewMatchesClick: () -> Unit,
+    onNavigateToEditMatchClick: (Match) -> Unit,
     onViewMyMatchesClick: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -50,6 +51,7 @@ fun HomeScreen(
             MyMatchesSection(
                 matches = myMatches,
                 currentUserId = currentUserId,
+                onNavigateToEditMatchClick = onNavigateToEditMatchClick,
                 onViewAllClick = onViewMyMatchesClick,
                 viewModel = viewModel
             )
@@ -92,6 +94,7 @@ private fun MyMatchesSection(
     matches: List<Match>,
     currentUserId: String,
     onViewAllClick: () -> Unit,
+    onNavigateToEditMatchClick: (Match) -> Unit,
     viewModel: HomeViewModel
 ) {
     Column(
@@ -150,6 +153,7 @@ private fun MyMatchesSection(
                             match = match,
                             currentUserId = currentUserId,
                             onJoinClick = {},
+                            onEditClick = onNavigateToEditMatchClick,
                             onDeleteClick = {viewModel.deleteMatch(match.id)}
                         )
                     }

@@ -8,6 +8,7 @@ import com.example.padelconnect.data.model.Match
 import com.example.padelconnect.data.model.Participant
 import com.example.padelconnect.data.preferences.UserPreferences
 import com.example.padelconnect.data.repository.MatchRepository
+import com.example.padelconnect.ui.match_state.MatchFormUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +27,8 @@ class CreateMatchViewModel @Inject constructor(
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(CreateMatchUiState())
-    val uiState: StateFlow<CreateMatchUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(MatchFormUiState())
+    val uiState: StateFlow<MatchFormUiState> = _uiState.asStateFlow()
 
     private val _isMatchCreated = MutableStateFlow(false)
     val isMatchCreated: StateFlow<Boolean> = _isMatchCreated.asStateFlow()

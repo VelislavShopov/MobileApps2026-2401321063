@@ -72,4 +72,24 @@ class MatchRepository @Inject constructor(
             false
         }
     }
+
+    suspend fun editMatch(match: Match): Boolean {
+        return try {
+            matchesCollection.document(match.id).set(match).await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun getMatch(matchId: String): Match? {
+        return try {
+            val snapshot = matchesCollection.document(matchId).get().await()
+            snapshot.toObject(Match::class.java)?.copy(id = snapshot.id)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 }
