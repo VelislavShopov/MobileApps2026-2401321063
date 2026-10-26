@@ -136,7 +136,7 @@ class EditMatchViewModel @Inject constructor(
         }
 
         val startTotalMinutes = state.startHour * 60 + state.startMinutes
-        val endTotalMinutes = state.endHour * 60 + state.endMinutes - 30
+        val endTotalMinutes = state.endHour * 60 + state.endMinutes - 29
         return endTotalMinutes > startTotalMinutes
     }
 

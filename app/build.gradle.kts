@@ -38,6 +38,9 @@ android {
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
         }
+        debug{
+            enableUnitTestCoverage = true
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -57,6 +60,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.ui.test.junit4)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -76,4 +80,10 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core:1.6.1")
+
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0") // или версията, която вече ползвате за корутини
+    testImplementation("io.mockk:mockk:1.13.10")
 }

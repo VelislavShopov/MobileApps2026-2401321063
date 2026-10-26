@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
-
+interface MatchCreator {
+    suspend fun createMatch(match: Match)
+}
 @Singleton
 class MatchRepository @Inject constructor(
     private val firestore: FirebaseFirestore
-) {
+) : MatchCreator{
     private val matchesCollection = firestore.collection("matches")
 
     // Real-time listener: emits updated match lists to all devices instantly
@@ -35,7 +37,7 @@ class MatchRepository @Inject constructor(
     }
 
     // Creates a new match document on Firebase
-    suspend fun createMatch(match: Match) {
+    override suspend fun createMatch(match: Match) {
         matchesCollection.document(match.id).set(match).await()
     }
 

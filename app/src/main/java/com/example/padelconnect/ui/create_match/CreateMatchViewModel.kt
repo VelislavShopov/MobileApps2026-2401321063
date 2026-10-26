@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.padelconnect.data.model.Match
 import com.example.padelconnect.data.model.Participant
 import com.example.padelconnect.data.preferences.UserPreferences
+import com.example.padelconnect.data.repository.MatchCreator
 import com.example.padelconnect.data.repository.MatchRepository
 import com.example.padelconnect.ui.match_state.MatchFormUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateMatchViewModel @Inject constructor(
-    private val matchRepository: MatchRepository,
+    private val matchRepository: MatchCreator,
     @param:ApplicationContext private val context: Context,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
@@ -76,6 +77,10 @@ class CreateMatchViewModel @Inject constructor(
                 e.printStackTrace()
             }
         }
+
+        if (_uiState.value.streetAddress.isNullOrEmpty()){
+            _uiState.update { it.copy(streetAddress = "Unknown address") }
+        }
     }
 
     fun onDateChanged(newDate: String) {
@@ -100,7 +105,7 @@ class CreateMatchViewModel @Inject constructor(
         }
 
         val startTotalMinutes = state.startHour * 60 + state.startMinutes
-        val endTotalMinutes = state.endHour * 60 + state.endMinutes - 30
+        val endTotalMinutes = state.endHour * 60 + state.endMinutes - 29
         return endTotalMinutes > startTotalMinutes
     }
 
