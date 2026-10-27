@@ -50,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.padelconnect.ui.match_state.MatchFormUiState
@@ -88,7 +89,9 @@ fun MatchFormContent(
         isMapLoaded = true
     }
 
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis()
+    )
     val dateFormatter = remember { DatePickerDefaults.dateFormatter() }
 
     LaunchedEffect(datePickerState.selectedDateMillis) {
@@ -127,7 +130,7 @@ fun MatchFormContent(
                 ) {
                     if (isMapLoaded) {
                         GoogleMap(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().testTag("map"),
                             cameraPositionState = cameraPositionState,
                             onMapClick = { latLng ->
                                 onMapClick(latLng.latitude, latLng.longitude)
@@ -194,6 +197,7 @@ fun MatchFormContent(
             title = "Match Details"
         ) {
             DetailPickerRow(
+                modifier = Modifier.fillMaxSize().testTag("date_select"),
                 label = uiState.dateText.ifBlank { "Select Date" },
                 icon = Icons.Rounded.CalendarToday,
                 isSelected = uiState.dateText.isNotBlank(),
@@ -203,6 +207,7 @@ fun MatchFormContent(
             Spacer(modifier = Modifier.height(10.dp))
 
             DetailPickerRow(
+                modifier = Modifier.fillMaxSize(),
                 label = uiState.startTimeText.ifBlank { "Select Start Time" },
                 icon = Icons.Rounded.AccessTime,
                 isSelected = uiState.startTimeText.isNotBlank(),
@@ -213,6 +218,7 @@ fun MatchFormContent(
             Spacer(modifier = Modifier.height(10.dp))
 
             DetailPickerRow(
+                modifier = Modifier.fillMaxSize(),
                 label = uiState.endTimeText.ifBlank { "Select End Time" },
                 icon = Icons.Rounded.AccessTime,
                 isSelected = uiState.endTimeText.isNotBlank(),

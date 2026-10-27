@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun DetailPickerRow(
+    modifier: Modifier,
     label: String,
     icon: ImageVector,
     isSelected: Boolean,
@@ -50,7 +51,7 @@ fun DetailPickerRow(
     OutlinedCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         border = BorderStroke(width = if (isError) 1.5.dp else 1.dp, color = borderColor)
     ) {
         Row(
